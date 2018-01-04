@@ -5,7 +5,7 @@ active_user = ""
 is_admin = False
 
 def verifyUser(username,password):
-    username, password = "Admin", "P4ssw0rd"
+    #username, password = "Admin", "P4ssw0rd"
     username,password = username.rstrip(),password.rstrip()
     result = user_controller.VerifyUser(username,password)
     if not result:
