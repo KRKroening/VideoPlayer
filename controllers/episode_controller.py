@@ -14,8 +14,8 @@ def listRecentEpisodes():
 
 def addNewEpisode(data):
     with dbConnect() as cursor:
-        cursor.execute('INSET INTO Episodes(Name,Description,Series,EpisodeNumber,SeasonNumber,FileLocation,DateAdded) '
+        cursor.execute('INSERT INTO Episodes(Name,Description,Series,EpisodeNumber,SeasonNumber,FileLocation,DateAdded) '
                        'Values(?,?,?,?,?,?,?)',
-                       data["Name"], data["Description"], data["Series"], data["EpisodeNumber"], data["SeasonNumber"],
-                       data["FileLocation"], data["FileLocation"])
+                       (data["Name"], data["Description"], data["Series"], data["EpisodeNumber"], data["SeasonNumber"],
+                       data["FileLocation"], data["DateAdded"],))
         return cursor.fetchall()

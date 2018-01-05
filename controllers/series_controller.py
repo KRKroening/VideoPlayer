@@ -8,7 +8,7 @@ def listAllSeries():
 
 def getSeriesIdByName(name):
     with dbConnect() as cursor:
-        cursor.execute('SELECT SeriesId FROM Series where Name = ?',name)
+        cursor.execute('SELECT SeriesId FROM Series where Name = ?',(name,))
         return cursor.fetchone()
 
 def addNewSeries(data):

@@ -29,12 +29,26 @@ class MainScreen():
         self.root.mainloop()
 
     def MostRecentEpisodes(self):
+        self.body.destroy()
+        self.body = tk.Frame(self.root)
+        self.body.pack(side=tk.TOP, fill=tk.X)
         recents = episode_controller.listRecentEpisodes()
-        for epi in recents:
-            test = tk.Label(self.root, text=epi["Name"])
+        if not recents:
+            test = tk.Label(self.body, text="No Episodes Found")
             test.pack()
+        else:
+            for epi in recents:
+                test = tk.Label(self.body, text=epi[0])
+                test.pack()
 
     def ListAllCategories(self):
+        for widget in self.toolbar.winfo_children():
+            widget.destroy()
+        home = tk.Button(self.toolbar,
+                  text="Home",
+                  command=lambda: self.MostRecentEpisodes()
+                  )
+        home.pack(side=tk.LEFT)
         recents = category_controller.listAllCategories()
         for cat in recents:
             test = tk.Button(self.toolbar,
@@ -74,7 +88,6 @@ class MainScreen():
             name.pack(side=tk.LEFT)
             desc = tk.Label(inv_frame, text=l[1])
             desc.pack(side=tk.LEFT)
-
 
     def LoginWindow(self):
         popup = tk.Toplevel(self.root)
@@ -151,7 +164,7 @@ class MainScreen():
         e_var.set("Select")
         series_options = series_controller.listAllSeries()
         series_options = util.returnDropDownList(series_options,1)
-        e_seriesDD = tk.OptionMenu(episode_frame, e_var, series_options)
+        e_seriesDD = tk.OptionMenu(episode_frame, e_var, *series_options)
         e_seriesDD.pack()
         e_descriptionLabel = tk.Label(episode_frame, text="Description")
         e_descriptionLabel.pack()
@@ -230,6 +243,13 @@ class MainScreen():
 
         episode_manager.compileDataForNewEpisodeEntry(data)
 
+        frame.children["e_nameBox"].delete("1.0", tk.END)
+        frame.children["e_descriptionText"].delete("1.0", tk.END)
+        frame.children["e_episodeNumberText"].delete("1.0", tk.END)
+        frame.children["e_seasonNumberText"].delete("1.0", tk.END)
+        frame.children["e_locationText"].delete("1.0", tk.END)
+        e_var.set("Select")
+
     def submitNewSeries(self):
         frame = self.body.children["series_frame"]
         e_categoryDD = []
@@ -262,6 +282,7 @@ class MainScreen():
         category_manager.compileDataForNewCategoryEntry(data)
 
         frame.children["c_nameBox"].delete("1.0", tk.END)
+        self.ListAllCategories()
 
     def submitNewUser(self,u_var):
         frame = self.body.children["user_frame"]
