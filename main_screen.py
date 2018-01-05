@@ -148,6 +148,7 @@ class MainScreen():
         e_seriesLabel = tk.Label(episode_frame, text="Series")
         e_seriesLabel.pack()
         e_var = tk.StringVar()
+        e_var.set("Select")
         series_options = series_controller.listAllSeries()
         series_options = util.returnDropDownList(series_options,1)
         e_seriesDD = tk.OptionMenu(episode_frame, e_var, series_options)
@@ -168,7 +169,7 @@ class MainScreen():
         e_locationLabel.pack()
         e_locationText = tk.Text(episode_frame, name="e_locationText", height=1, width=50)
         e_locationText.pack()
-        e_submit = tk.Button(episode_frame, text="Submit", command=lambda: self.submitNewEpisode())
+        e_submit = tk.Button(episode_frame, text="Submit", command=lambda: self.submitNewEpisode(e_var))
         e_submit.pack()
         #endregion
 
@@ -198,21 +199,23 @@ class MainScreen():
         u_roleLabel = tk.Label(user_frame, text="Role")
         u_roleLabel.pack()
         u_var = tk.StringVar()
+        u_var.set("Select")
         role_options = role_controller.listAllRoles()
         role_options = util.returnDropDownList(role_options,0)
         u_roleDD = tk.OptionMenu(user_frame, u_var, *role_options)
         u_roleDD.pack()
-        u_submit = tk.Button(user_frame, text="Submit", command=lambda: self.submitNewUser())
+        u_submit = tk.Button(user_frame, text="Submit", command=lambda: self.submitNewUser(u_var))
         u_submit.pack()
 
         #endregion
 
-    def submitNewEpisode(self):
+    def submitNewEpisode(self, e_var):
         frame = self.body.children["episode_frame"]
-        e_seriesDD = ""
+        e_seriesDD = e_var.get()
+        dropdown = ""
         for widget in frame.winfo_children():
             if isinstance(widget, tk.OptionMenu):
-                e_seriesDD = widget.getvar("e_var")
+                dropdown = widget
 
         data = {
             "Name" : frame.children["e_nameBox"].get("1.0",tk.END).rstrip(),
@@ -225,9 +228,6 @@ class MainScreen():
 
         }
 
-        #frame.children["e_seriesDD"].get("1.0",tk.END)
-
-        #ch = self.body.children["episode_frame"].children["e_nameBox"].get("1.0",tk.END)
         episode_manager.compileDataForNewEpisodeEntry(data)
 
     def submitNewSeries(self):
@@ -263,16 +263,14 @@ class MainScreen():
 
         frame.children["c_nameBox"].delete("1.0", tk.END)
 
-    def submitNewUser(self):
+    def submitNewUser(self,u_var):
         frame = self.body.children["user_frame"]
-        u_role_selected = []
+        u_role_selected = u_var.get()
         dropdown = ""
         for widget in frame.winfo_children():
             if isinstance(widget, tk.OptionMenu):
-                t = widget.children.get("u_var")
-                listbox = widget
-                for item in t:
-                    u_role_selected.append(widget.get(item))
+                dropdown = widget
+
         data = {
             "Username": frame.children["u_usernameBox"].get("1.0", tk.END).rstrip(),
             "Password" : frame.children["u_passwordBox"].get("1.0", tk.END).rstrip(),

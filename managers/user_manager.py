@@ -1,8 +1,8 @@
 from controllers import user_controller, role_controller
 from main_screen import MainScreen
 
-active_user = ""
-is_admin = False
+# active_user = ""
+# is_admin = False
 
 def verifyUser(username,password):
     #username, password = "Admin", "P4ssw0rd"
