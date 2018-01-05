@@ -1,6 +1,6 @@
 import tkinter as tk
 from controllers import episode_controller, category_controller, series_controller, role_controller
-from managers import user_manager
+from managers import user_manager, episode_manager, series_manager, category_manager
 import util
 
 
@@ -62,8 +62,19 @@ class MainScreen():
         self.body = tk.Frame(self.root)
         self.body.pack(side=tk.TOP, fill=tk.X)
 
-        test = tk.Label(self.body,text=id)
-        test.pack()
+        genre = category_controller.getCategoryNameById(id)
+        label = tk.Label(self.body, text=genre)
+        label.pack(side=tk.TOP)
+
+        listing = series_controller.listSeriesByCategory(id)
+        for l in listing:
+            inv_frame = tk.Frame(self.body)
+            inv_frame.pack(side=tk.TOP)
+            name = tk.Button(inv_frame,text=l[0], command= lambda i = l[0]: self.openSeriesPage(i))
+            name.pack(side=tk.LEFT)
+            desc = tk.Label(inv_frame, text=l[1])
+            desc.pack(side=tk.LEFT)
+
 
     def LoginWindow(self):
         popup = tk.Toplevel(self.root)
@@ -94,35 +105,34 @@ class MainScreen():
         self.body = tk.Frame(self.root)
         self.body.pack(side=tk.TOP, fill=tk.X)
 
-        series_frame = tk.Frame(self.body,width=int(self.root.winfo_screenwidth()*.5),height=int(self.root.winfo_screenheight()*.5),borderwidth=2,relief=tk.GROOVE)
+        series_frame = tk.Frame(self.body,name="series_frame", width=int(self.root.winfo_screenwidth()*.5),height=int(self.root.winfo_screenheight()*.5),borderwidth=2,relief=tk.GROOVE)
         series_frame.pack(side=tk.LEFT)
-        episode_frame = tk.Frame(self.body,width=int(self.root.winfo_screenwidth()*.5),height=int(self.root.winfo_screenheight()*.5),borderwidth=2,relief=tk.GROOVE)
+        episode_frame = tk.Frame(self.body,name="episode_frame", width=int(self.root.winfo_screenwidth()*.5),height=int(self.root.winfo_screenheight()*.5),borderwidth=2,relief=tk.GROOVE)
         episode_frame.pack(side=tk.LEFT)
-        category_frame = tk.Frame(self.body,width=int(self.root.winfo_screenwidth()*.5),height=int(self.root.winfo_screenheight()*.5),borderwidth=2,relief=tk.GROOVE)
+        category_frame = tk.Frame(self.body,name="category_frame", width=int(self.root.winfo_screenwidth()*.5),height=int(self.root.winfo_screenheight()*.5),borderwidth=2,relief=tk.GROOVE)
         category_frame.pack(side=tk.LEFT)
-        user_frame = tk.Frame(self.body,width=int(self.root.winfo_screenwidth()*.5),height=int(self.root.winfo_screenheight()*.5),borderwidth=2,relief=tk.GROOVE)
+        user_frame = tk.Frame(self.body,name="user_frame", width=int(self.root.winfo_screenwidth()*.5),height=int(self.root.winfo_screenheight()*.5),borderwidth=2,relief=tk.GROOVE)
         user_frame.pack(side=tk.LEFT)
 
         #region Series widgets
-        s_title = tk.Label(series_frame, text="Create New Series")
+        s_title = tk.Label(series_frame, name="series_frame", text="Create New Series")
         s_title.pack()
         s_nameLabel = tk.Label(series_frame, text="Name")
         s_nameLabel.pack()
-        s_nameBox = tk.Text(series_frame, height=1, width=40)
+        s_nameBox = tk.Text(series_frame, name="s_nameBox", height=1, width=40)
         s_nameBox.pack()
         s_categoryLabel = tk.Label(series_frame, text="Category")
         s_categoryLabel.pack()
         s_var = tk.StringVar()
         category_options = category_controller.listAllCategories()
         category_options = util.returnDropDownList(category_options,1)
-        #s_categoryDD = tk.OptionMenu(series_frame, s_var, *category_options )
-        s_categoryDD = tk.Listbox(series_frame, listvariable=s_var, selectmode=tk.MULTIPLE, width=20, height=10)
+        s_categoryDD = tk.Listbox(series_frame, name="s_categoryDD", listvariable=s_var, selectmode=tk.MULTIPLE, width=20, height=10)
         for item in category_options:
             s_categoryDD.insert(tk.END, item)
         s_categoryDD.pack()
         s_descriptionLabel = tk.Label(series_frame, text="Description")
         s_descriptionLabel.pack()
-        s_descriptionText = tk.Text(series_frame,height=1,width=40)
+        s_descriptionText = tk.Text(series_frame, name="s_descriptionText", height=1,width=40)
         s_descriptionText.pack()
         s_submit = tk.Button(series_frame,text="Submit",command= lambda : self.submitNewSeries())
         s_submit.pack()
@@ -133,7 +143,7 @@ class MainScreen():
         e_title.pack()
         e_nameLabel = tk.Label(episode_frame, text="Name")
         e_nameLabel.pack()
-        e_nameBox = tk.Text(episode_frame, height=1, width=40)
+        e_nameBox = tk.Text(episode_frame, name="e_nameBox", height=1, width=40)
         e_nameBox.pack()
         e_seriesLabel = tk.Label(episode_frame, text="Series")
         e_seriesLabel.pack()
@@ -144,30 +154,30 @@ class MainScreen():
         e_seriesDD.pack()
         e_descriptionLabel = tk.Label(episode_frame, text="Description")
         e_descriptionLabel.pack()
-        e_descriptionText = tk.Text(episode_frame, height=1, width=40)
+        e_descriptionText = tk.Text(episode_frame,name="e_descriptionText", height=1, width=40)
         e_descriptionText.pack()
         e_episodeNumberLabel = tk.Label(episode_frame, text="Episode Number")
         e_episodeNumberLabel.pack()
-        e_episodeNumberText = tk.Text(episode_frame, height=1, width=3)
+        e_episodeNumberText = tk.Text(episode_frame, name="e_episodeNumberText", height=1, width=3)
         e_episodeNumberText.pack()
         e_seasonNumberLabel = tk.Label(episode_frame, text="season Number")
         e_seasonNumberLabel.pack()
-        e_seasonNumberText = tk.Text(episode_frame, height=1, width=3)
+        e_seasonNumberText = tk.Text(episode_frame, name="e_seasonNumberText", height=1, width=3)
         e_seasonNumberText.pack()
         e_locationLabel = tk.Label(episode_frame, text="File Name")
         e_locationLabel.pack()
-        e_locationText = tk.Text(episode_frame, height=1, width=50)
+        e_locationText = tk.Text(episode_frame, name="e_locationText", height=1, width=50)
         e_locationText.pack()
         e_submit = tk.Button(episode_frame, text="Submit", command=lambda: self.submitNewEpisode())
         e_submit.pack()
         #endregion
 
         #region Category Widgets
-        c_title = tk.Label(category_frame, text="Create New Category")
+        c_title = tk.Label(category_frame, name="category_frame", text="Create New Category")
         c_title.pack()
         c_nameLabel = tk.Label(category_frame, text="Description")
         c_nameLabel.pack()
-        c_nameBox = tk.Text(category_frame, height=1, width=40)
+        c_nameBox = tk.Text(category_frame, name="c_nameBox", height=1, width=40)
         c_nameBox.pack()
         c_submit = tk.Button(category_frame,text="Submit",command= lambda : self.submitNewCategory())
         c_submit.pack()
@@ -175,15 +185,15 @@ class MainScreen():
         #endregion
 
         #region User Widgets
-        u_title = tk.Label(user_frame, text="Create New User")
+        u_title = tk.Label(user_frame, name="user_frame", text="Create New User")
         u_title.pack()
         u_usernameLabel = tk.Label(user_frame, text="Username")
         u_usernameLabel.pack()
-        u_usernameBox = tk.Text(user_frame, height=1, width=40)
+        u_usernameBox = tk.Text(user_frame, name="u_usernameBox", height=1, width=40)
         u_usernameBox.pack()
         u_passwordLabel = tk.Label(user_frame, text="Password")
         u_passwordLabel.pack()
-        u_passwordBox = tk.Text(user_frame, height=1, width=40)
+        u_passwordBox = tk.Text(user_frame, name="u_passwordBox", height=1, width=40)
         u_passwordBox.pack()
         u_roleLabel = tk.Label(user_frame, text="Role")
         u_roleLabel.pack()
@@ -196,5 +206,81 @@ class MainScreen():
         u_submit.pack()
 
         #endregion
+
+    def submitNewEpisode(self):
+        frame = self.body.children["episode_frame"]
+        e_seriesDD = ""
+        for widget in frame.winfo_children():
+            if isinstance(widget, tk.OptionMenu):
+                e_seriesDD = widget.getvar("e_var")
+
+        data = {
+            "Name" : frame.children["e_nameBox"].get("1.0",tk.END).rstrip(),
+            "Series" : e_seriesDD,
+            "Description" : frame.children["e_descriptionText"].get("1.0",tk.END).rstrip(),
+            "EpisodeNumber" : int(frame.children["e_episodeNumberText"].get("1.0",tk.END).rstrip()),
+            "SeasonNumber" : int(frame.children["e_seasonNumberText"].get("1.0",tk.END).rstrip()),
+            "FileLocation" : frame.children["e_locationText"].get("1.0",tk.END).rstrip(),
+            "DateAdded" : ""
+
+        }
+
+        #frame.children["e_seriesDD"].get("1.0",tk.END)
+
+        #ch = self.body.children["episode_frame"].children["e_nameBox"].get("1.0",tk.END)
+        episode_manager.compileDataForNewEpisodeEntry(data)
+
+    def submitNewSeries(self):
+        frame = self.body.children["series_frame"]
+        e_categoryDD = []
+        listbox = ""
+        for widget in frame.winfo_children():
+            if isinstance(widget, tk.Listbox):
+                t = widget.curselection()
+                listbox = widget
+                for item in t:
+                    e_categoryDD.append(widget.get(item))
+        data = {
+            "Name": frame.children["s_nameBox"].get("1.0", tk.END).rstrip(),
+            "Category": e_categoryDD,
+            "Description": frame.children["s_descriptionText"].get("1.0", tk.END).rstrip(),
+        }
+
+        series_manager.compileNewSeriesData(data)
+
+        #clear fields
+        frame.children["s_nameBox"].delete('1.0', tk.END)
+        frame.children["s_descriptionText"].delete("1.0", tk.END)
+        listbox.selection_clear(0, tk.END)
+
+    def submitNewCategory(self):
+        frame = self.body.children["category_frame"]
+
+        data = {
+            "Description": frame.children["c_nameBox"].get("1.0", tk.END).rstrip(),
+        }
+        category_manager.compileDataForNewCategoryEntry(data)
+
+        frame.children["c_nameBox"].delete("1.0", tk.END)
+
+    def submitNewUser(self):
+        frame = self.body.children["user_frame"]
+        u_role_selected = []
+        dropdown = ""
+        for widget in frame.winfo_children():
+            if isinstance(widget, tk.OptionMenu):
+                t = widget.children.get("u_var")
+                listbox = widget
+                for item in t:
+                    u_role_selected.append(widget.get(item))
+        data = {
+            "Username": frame.children["u_usernameBox"].get("1.0", tk.END).rstrip(),
+            "Password" : frame.children["u_passwordBox"].get("1.0", tk.END).rstrip(),
+            "Role" : u_role_selected
+        }
+        user_manager.compileDataForNewUserEntry(data)
+
+        frame.children["u_usernameBox"].delete("1.0", tk.END)
+        frame.children["u_passwordBox"].delete("1.0", tk.END)
 
 MainScreen()
