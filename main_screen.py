@@ -2,6 +2,11 @@ import tkinter as tk
 from controllers import episode_controller, category_controller, series_controller, role_controller
 from managers import user_manager, episode_manager, series_manager, category_manager
 import util
+import os
+
+import pgi
+pgi.install_as_gi()
+from gi.repository import Gtk, GObject
 
 
 
@@ -88,6 +93,70 @@ class MainScreen():
             name.pack(side=tk.LEFT)
             desc = tk.Label(inv_frame, text=l[1])
             desc.pack(side=tk.LEFT)
+
+    def openSeriesPage(self, i):
+        self.body.destroy()
+        self.body = tk.Frame(self.root)
+        self.body.pack(side=tk.TOP, fill=tk.X)
+
+        # scroll = tk.Scrollbar(self.body)
+        # scroll.pack(side=tk.RIGHT)
+
+        series_lable = tk.Label(self.body, text="Episode List for " + i + "\n")
+        series_lable.pack(side=tk.TOP)
+
+        episode_list = episode_controller.listAllEpisodesBySeries(i)
+        episode_list = sorted(episode_list, key=lambda x: x[3])
+
+        season = 0
+        for epi in episode_list:
+            if season != epi[3]:
+                season = epi[3]
+                season_seperator = tk.Label(self.body, text="\n Season "+str(season)+"\n")
+                season_seperator.pack()
+            inv_frame = tk.Frame(self.body)
+            inv_frame.pack()
+            watch = tk.Button(inv_frame, text="watch", command=lambda i=epi[0]: self.openVideoPage(i))
+            watch.pack(side=tk.LEFT)
+            epiLabel = tk.Label(inv_frame, text="Episode " + str(epi[2]))
+            epiLabel.pack(side=tk.LEFT)
+            seasLabel = tk.Label(inv_frame, text="Season " + str(epi[3]))
+            seasLabel.pack(side=tk.LEFT)
+            nameLabel = tk.Label(inv_frame, text=epi[1])
+            nameLabel.pack(side=tk.LEFT)
+
+    def set_frame_handle(bus, message, frame_id):
+        if not message.get_structure() is None:
+            if message.get_structure().get_name() == 'prepare-window-handle':
+                display_frame = message.src
+                display_frame.set_property('force-aspect-ratio', True)
+                display_frame.set_window_handle(frame_id)
+
+    def openVideoPage(self, episode):
+        self.body.destroy()
+        self.body = tk.Frame(self.root)
+        self.body.pack(side=tk.TOP, fill=tk.X)
+
+        episode_info = episode_controller.getEpisodeByEpisodeId(episode)
+        file_loc = episode_info[4]
+
+        Gst.init(None)
+        GObject.threads_init()
+
+        video = tk.Frame(self.body, bg='#000000')
+        video.grid(row=0, column=0, sticky="nsew")
+
+        frame_id = video.winfo_id()
+
+        player = Gst.ElementFactory.make('playbin', None)
+        player.set_property('video-sink', None)
+        player.set_property('uri', 'file://%s' % (os.path.abspath("episodes/"+file_loc)))
+        player.set_state(Gst.State.PLAYING)
+
+        bus = player.get_bus()
+        bus.add_signal_watch()
+        bus.enable_sync_message_emission()
+        bus.connect('sync-message::element', set_frame_handle, frame_id)
 
     def LoginWindow(self):
         popup = tk.Toplevel(self.root)
